@@ -1,0 +1,7 @@
+.idea/
+.vscode/
+*neighbors
+data/
+compute_groundtruth
+vec_to_bin
+algorithms/utils/parlay/
