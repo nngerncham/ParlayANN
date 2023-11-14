@@ -12,13 +12,17 @@
 using pid = std::pair<int, float>;
 
 template<typename PointRange>
-parlay::sequence<parlay::sequence<pid>> compute_groundtruth(PointRange &B, 
+parlay::sequence<parlay::sequence<pid>> compute_groundtruth(PointRange &B,
   PointRange &Q, int k){
+    /**
+     * Input: B (base), Q (query), and k (number of nearest neighbors to compute)
+     * Returns: nested sequence of pairs (pid) of size k for each query point
+     */
     unsigned d = B.dimension();
     size_t q = Q.size();
     size_t b = B.size();
-    auto answers = parlay::tabulate(q, [&] (size_t i){  
-        float topdist = B[0].d_min();   
+    auto answers = parlay::tabulate(q, [&] (size_t i){
+        float topdist = B[0].d_min();
         int toppos;
         parlay::sequence<pid> topk;
         for(size_t j=0; j<b; j++){
@@ -26,13 +30,13 @@ parlay::sequence<parlay::sequence<pid>> compute_groundtruth(PointRange &B,
             float dist = Q[i].distance(B[j]);
             if(topk.size() < k){
                 if(dist > topdist){
-                    topdist = dist;   
+                    topdist = dist;
                     toppos = topk.size();
                 }
                 topk.push_back(std::make_pair((int) j, dist));
             }
             else if(dist < topdist){
-                float new_topdist=B[0].d_min();  
+                float new_topdist=B[0].d_min();
                 int new_toppos=0;
                 topk[toppos] = std::make_pair((int) j, dist);
                 for(size_t l=0; l<topk.size(); l++){
@@ -51,6 +55,25 @@ parlay::sequence<parlay::sequence<pid>> compute_groundtruth(PointRange &B,
     return answers;
 }
 
+
+template<typename PointRange>
+parlay::sequence<parlay::sequence<parlay::sequence<pid>>>
+compute_groundtruths_with_removal(PointRange &B, PointRange &Q, int interval, int k) {
+    /**
+     * Input: B (base), Q (query--reused), interval (how many points to remove each round), and k (number of nearest neighbors to compute)
+     * Returns: nested sequence of pairs (pid) of size k for each query point
+     */
+    unsigned d = B.dimension();
+    int runs = B.size() / interval;
+    size_t q = Q.size();
+    size_t b = B.size();
+    auto answers = parlay::tabulate(runs, [&] (size_t i){
+        PointRange removed_B = B.get_slice(i * interval);
+        return compute_groundtruth(removed_B, Q, k);
+    });
+    std::cout << "Done computing groundtruth with removal" << std::endl;
+    return answers;
+}
 
 
 void write_ibin(parlay::sequence<parlay::sequence<pid>> &result, const std::string outFile, int k){
@@ -163,4 +186,3 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
-

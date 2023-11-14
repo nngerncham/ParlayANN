@@ -102,6 +102,10 @@ struct PointRange{
     return Point(values.get()+i*aligned_dims, dims, aligned_dims, i);
   }
 
+  PointRange get_slice(long b) {
+      return PointRange(values.get()+b*aligned_dims, n-b, dims, aligned_dims);
+  }
+
 private:
   std::shared_ptr<T[]> values;
   unsigned int dims;
