@@ -6,3 +6,4 @@ compute_groundtruth
 vec_to_bin
 algorithms/utils/parlay/
 crop
+check_streaming

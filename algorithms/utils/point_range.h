@@ -115,6 +115,15 @@ struct PointRange {
 	return pr;
   }
 
+  void print() {
+	for (long i = 0; i < n; i++) {
+	  for (long j = 0; j < dims; j++) {
+		std::cout << values.get()[i * aligned_dims + j] << " ";
+	  }
+	  std::cout << std::endl << std::endl;
+	}
+  }
+
   size_t size() { return n; }
 
   Point operator[](long i) {

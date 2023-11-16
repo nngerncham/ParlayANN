@@ -10,4 +10,7 @@ crop : crop.cpp
 	$(CC) $(CFLAGS) -o crop crop.cpp $(LFLAGS) 
 
 random_sample : random_sample.cpp
-	$(CC) $(CFLAGS) -o random_sample random_sample.cpp $(LFLAGS) 
+	$(CC) $(CFLAGS) -o random_sample random_sample.cpp $(LFLAGS)
+
+check_streaming: check_streaming.cpp
+	$(CC) $(CFLAGS) -o check_streaming check_streaming.cpp $(LFLAGS)
