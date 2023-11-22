@@ -28,7 +28,6 @@ cc_library(
         "@parlaylib//parlay:parallel",
         "@parlaylib//parlay:primitives",
         "@parlaylib//parlay:random",
-        ":indexTools",
         ":types",
         ":NSGDist",
     ],
@@ -40,7 +39,6 @@ cc_library(
     deps = [
         "@parlaylib//parlay:parallel",
         "@parlaylib//parlay:primitives",
-        ":indexTools",
         ":types",
     ],
 )
@@ -51,7 +49,6 @@ cc_library(
     deps = [
         "@parlaylib//parlay:parallel",
         "@parlaylib//parlay:primitives",
-        ":indexTools",
     ],
 )
 
@@ -63,7 +60,6 @@ cc_library(
         "@parlaylib//parlay:primitives",
         ":beamSearch",
         ":csvfile",
-        ":indexTools",
         ":parse_results",
         ":types",
     ],
