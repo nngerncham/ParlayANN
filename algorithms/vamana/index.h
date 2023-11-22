@@ -345,6 +345,7 @@ struct knn_index {
     }
 
     delete_set.insert(q);  // so that it can be replaced next time
+    edgeRange<indexType> q_neighbors = G[q];
     for (indexType p = 0; p < G.size(); p += G.max_degree()) {
       // ignored already deleted and point to be deleted
       if (delete_set.find(p) != delete_set.end() || p == q) {
@@ -363,6 +364,14 @@ struct knn_index {
           candidates.push_back(std::make_pair(neighbor, PR[neighbor].distance(PR[q])));
         }
       }
+      for (indexType neighbor = q_neighbors.begin(); neighbor != neighbors.end(); neighbor++) {
+        if (neighbor != q) {
+          candidates.push_back(std::make_pair(neighbor, PR[neighbor].distance(PR[q])));
+        }
+      }
+
+      parlay::sequence<indexType> pruned_candidates = robustPrune(q, &candidates, G, PR, BP.alpha, false);
+      G[p].update_neighbors(pruned_candidates);
     }
   }
 
