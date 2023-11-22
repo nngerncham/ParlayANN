@@ -9,3 +9,4 @@ crop
 check_streaming
 
 bazel-*
+*.csv
