@@ -211,7 +211,7 @@ struct knn_index {
   //     }  });
   //   parlay::parallel_for(0, v.size(), [&] (size_t i){
   //     if (delete_set.find(i) != delete_set.end()){
-  //      clear(v[i]);
+  //       clear(v[i]);
   //     } });
 
   //   delete_set.clear();
@@ -329,6 +329,55 @@ struct knn_index {
     parlay::sequence<indexType> inserts;
     inserts.push_back(p);
     batch_insert(inserts, G, true);
+  }
+
+  void delete_freshann(indexType q, Graph<indexType> &G, PointRange &PR) {
+    // error checking like in lazy_delete
+    if (q > (int)G.size()) {
+      std::cout << "ERROR: invalid point " << q << " given to lazy_delete"
+                << std::endl;
+      abort();
+    }
+    if (q == start_point) {
+      std::cout << "Deleting start_point not permitted; continuing"
+                << std::endl;
+      return;
+    }
+
+    delete_set.insert(q);  // so that it can be replaced next time
+    edgeRange<indexType> q_neighbors = G[q];
+    for (indexType p = 0; p < G.size(); p += G.max_degree()) {
+      // ignored already deleted and point to be deleted
+      if (delete_set.find(p) != delete_set.end() || p == q) {
+        continue;
+      }
+
+      // ignore points that don't have q in its neighborhood
+      edgeRange<indexType> neighbors = G[p];
+      if (!neighbors.contains(q)) {
+        continue;
+      }
+
+      parlay::sequence<pid> candidates;
+      for (indexType neighbor = neighbors.begin(); neighbor != neighbors.end();
+           neighbor++) {
+        if (neighbor != q) {
+          candidates.push_back(
+              std::make_pair(neighbor, PR[neighbor].distance(PR[q])));
+        }
+      }
+      for (indexType neighbor = q_neighbors.begin();
+           neighbor != neighbors.end(); neighbor++) {
+        if (neighbor != q) {
+          candidates.push_back(
+              std::make_pair(neighbor, PR[neighbor].distance(PR[q])));
+        }
+      }
+
+      parlay::sequence<indexType> pruned_candidates =
+          robustPrune(q, &candidates, G, PR, BP.alpha, false);
+      G[p].update_neighbors(pruned_candidates);
+    }
   }
 
   // void check_index(parlay::sequence<Tvec_point<T>*> &v){
